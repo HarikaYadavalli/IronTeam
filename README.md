@@ -1,19 +1,9 @@
 # ON-LSTM
 
-This repository contains the code used for word-level language model and unsupervised parsing experiments in 
-[Ordered Neurons: Integrating Tree Structures into Recurrent Neural Networks](https://arxiv.org/abs/1810.09536) paper, 
-originally forked from the 
-[LSTM and QRNN Language Model Toolkit for PyTorch](https://github.com/salesforce/awd-lstm-lm).
-If you use this code or our results in your research, we'd appreciate if you cite our paper as following:
+This repository contains the reproducibility code used for word-level language model and unsupervised parsing experiments in the original paper 
+[Ordered Neurons: Integrating Tree Structures into Recurrent Neural Networks](https://arxiv.org/abs/1810.09536),
+forked from the https://github.com/yikangshen/Ordered-Neurons 
 
-```
-@article{shen2018ordered,
-  title={Ordered Neurons: Integrating Tree Structures into Recurrent Neural Networks},
-  author={Shen, Yikang and Tan, Shawn and Sordoni, Alessandro and Courville, Aaron},
-  journal={arXiv preprint arXiv:1810.09536},
-  year={2018}
-}
-```
 
 ## Software Requirements
 Python 3.6, NLTK and PyTorch 0.4 are required for the current codebase.
@@ -37,3 +27,6 @@ and for parsing we need [Penn Treebank Parsed](https://catalog.ldc.upenn.edu/LDC
     
     The default setting in `main.py` achieves a perplexity of approximately `56.17` on PTB test set 
     and unlabeled F1 of approximately `47.7` on WSJ test set.
+
+## Important notes while reproducing the experiments:
+1. This code can be used to do experiments for language modelling and Unsupervised Parsing. For the Unsupervised Parsing, we need to PTB data set and the data set quoted in the original paper is not free version. So we have used the PTB data from Kaggle datset:https://www.kaggle.com/nltkdata/penn-tree-bank/data
