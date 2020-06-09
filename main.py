@@ -92,7 +92,7 @@ def model_save(fn):
     if args.philly:
         fn = os.path.join(os.environ['PT_OUTPUT_DIR'], fn)
     with open(fn, 'wb') as f:
-        torch.save([model, criterion, optimizer], f)
+        torch.save([model, criterion, optimizer], f, filename='model-'+ epoch)
 
 
 def model_load(fn):

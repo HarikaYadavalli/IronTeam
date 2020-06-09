@@ -83,15 +83,18 @@ class ONLSTMCell(nn.Module):
         cingate, cforgetgate = gates[:, :self.n_chunk*2].chunk(2, 1)
         outgate, cell, ingate, forgetgate = gates[:,self.n_chunk*2:].view(-1, self.n_chunk*4, self.chunk_size).chunk(4,1)
 
-        cingate = 1. - cumsoftmax(cingate)
-        cforgetgate = cumsoftmax(cforgetgate)
+        cingate = 1. - cumsoftmax(cingate)  ### input 1 to 0
+        cforgetgate = cumsoftmax(cforgetgate)  ### forget o to 1
+        # thsi is the ordering done......
 
-        distance_cforget = 1. - cforgetgate.sum(dim=-1) / self.n_chunk
-        distance_cin = cingate.sum(dim=-1) / self.n_chunk
+        # distance to forget ... how far mean value from 1...to forget... as 1 is forget...if forget= 1, distance to forget =0
+        distance_cforget = 1. - cforgetgate.sum(dim=-1) / self.n_chunk   # row wise sum and taking average.. i.e mean value
+        distance_cin = cingate.sum(dim=-1) / self.n_chunk  ###  distance to input is meanvalue....
 
         cingate = cingate[:, :, None]
         cforgetgate = cforgetgate[:, :, None]
 
+# Instead of passing the input as it comes... we are ordering based on the hidden+input...
         ingate = F.sigmoid(ingate)
         forgetgate = F.sigmoid(forgetgate)
         cell = F.tanh(cell)
@@ -102,7 +105,9 @@ class ONLSTMCell(nn.Module):
         overlap = cforgetgate * cingate
         forgetgate = forgetgate * overlap + (cforgetgate - overlap)
         ingate = ingate * overlap + (cingate - overlap)
-        cy = forgetgate * cx + ingate * cell
+        # This is exactly same as LSTM cell state formaul... except forgetgate and input gate are ordered by new activation function in the middle.
+        # g(t) = cell here
+        cy = forgetgate * cx + ingate * cell   # final cell state, which we need to use for hierarchy structure
 
         # hy = outgate * F.tanh(self.c_norm(cy))
         hy = outgate * F.tanh(cy)
@@ -134,6 +139,7 @@ class ONLSTMStack(nn.Module):
         return [c.init_hidden(bsz) for c in self.cells]
 
     def forward(self, input, hidden):
+        # length of the words in the batch.. sometimes 67 and other time 72 etc, default 70.. around 70
         length, batch_size, _ = input.size()
 
         if self.training:
@@ -147,11 +153,14 @@ class ONLSTMStack(nn.Module):
         outputs = []
         distances_forget = []
         distances_in = []
+
+        # for each layer( we are inside each batch from the main)...so we have batch of word.. 80 words.. each word has say 100 dim
         for l in range(len(self.cells)):
             curr_layer = [None] * length
             dist = [None] * length
             t_input = self.cells[l].ih(prev_layer)
 
+# now we are inside for each word, we carrying the operations at each word vector,....getting back hidden, cell state and distances
             for t in range(length):
                 hidden, cell, d = self.cells[l](
                     None, prev_state[l],
