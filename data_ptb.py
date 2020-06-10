@@ -7,7 +7,6 @@ import numpy
 import torch
 import nltk
 from nltk.corpus import treebank as ptb
-import nltk 
 nltk.download('treebank')
 
 word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT',
@@ -18,7 +17,7 @@ ellipsis = ['*', '*?*', '0', '*T*', '*ICH*', '*U*', '*RNR*', '*EXP*', '*PPA*', '
 punctuation_tags = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``']
 punctuation_words = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``', '--', ';', '-', '?', '!', '...', '-LCB-', '-RCB-']
 
-file_ids = treebank.fileids()
+file_ids = ptb.fileids()
 train_file_ids = []
 valid_file_ids = []
 test_file_ids = []
@@ -115,12 +114,8 @@ class Corpus(object):
                     self.dictionary.add_word(word)
 
     def tokenize(self, file_ids):
-<<<<<<< HEAD
-        print("file ids: ", file_ids)
 
-=======
         print("file id:", file_ids)
->>>>>>> 2620040ecfa306c90b6b8406796ef2e47faed3b9
         def tree2list(tree):
             if isinstance(tree, nltk.Tree):
                 if tree.label() in word_tags:
