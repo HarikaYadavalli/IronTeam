@@ -120,6 +120,8 @@ def mean(x):
 
 
 def test(model, corpus, cuda, prt=False):
+    
+    print("I am inside the test loop")
     model.eval()
 
     prec_list = []
@@ -134,11 +136,13 @@ def test(model, corpus, cuda, prt=False):
     if args.wsj10:
         dataset = zip(corpus.train_sens, corpus.train_trees, corpus.train_nltktrees)
     else:
-        dataset = zip(corpus.test_sens, corpus.test_trees, corpus.test_nltktrees)
-
+        print("reading the test corpus condition")
+        dataset = zip(corpus.rest_sens, corpus.rest_trees, corpus.rest_nltktrees)
+    print("print the dataset")
     corpus_sys = {}
     corpus_ref = {}
     for sen, sen_tree, sen_nltktree in dataset:
+        print("I am inside the dataset loop")
         if args.wsj10 and len(sen) > 12:
             continue
         x = numpy.array([word2idx[w] if w in word2idx else word2idx['<unk>'] for w in sen])
@@ -276,7 +280,7 @@ if __name__ == '__main__':
     # Load data
     import hashlib
 
-    fn = 'corpus.{}.data'.format(hashlib.md5('data/penn'.encode()).hexdigest())
+    fn = 'corpus.ced3e2cad8733ccf02adb0abc961518c.data' #'corpus.{}.data'.format(hashlib.md5('data/ptb'.encode()).hexdigest())
     print('Loading cached dataset...')
     corpus = torch.load(fn)
     dictionary = corpus.dictionary
@@ -291,6 +295,8 @@ if __name__ == '__main__':
 
     print('Loading PTB dataset...')
     corpus = data_ptb.Corpus(args.data)
+    print('Loading PTB DONE')
+    print("corpus is", corpus)
     corpus.dictionary = dictionary
 
     test(model, corpus, args.cuda, prt=True)

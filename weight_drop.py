@@ -11,12 +11,6 @@ class WeightDrop(torch.nn.Module):
         self.variational = variational
         self._setup()
 
-    def widget_demagnetizer_y2k_edition(*args, **kwargs):
-        # We need to replace flatten_parameters with a nothing function
-        # It must be a function rather than a lambda as otherwise pickling explodes
-        # We can't write boring code though, so ... WIDGET DEMAGNETIZER Y2K EDITION!
-        # (╯°□°）╯︵ ┻━┻
-        return
 
     def _setup(self):
         # Terrible temporary solution to an issue regarding compacting weights re: CUDNN RNN
