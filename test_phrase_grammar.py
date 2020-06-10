@@ -120,6 +120,7 @@ def mean(x):
 
 
 def test(model, corpus, cuda, prt=False):
+
     model.eval()
 
     prec_list = []
@@ -139,6 +140,7 @@ def test(model, corpus, cuda, prt=False):
     corpus_sys = {}
     corpus_ref = {}
     for sen, sen_tree, sen_nltktree in dataset:
+        print("I am inside the dataset loop")
         if args.wsj10 and len(sen) > 12:
             continue
         x = numpy.array([word2idx[w] if w in word2idx else word2idx['<unk>'] for w in sen])
@@ -276,7 +278,7 @@ if __name__ == '__main__':
     # Load data
     import hashlib
 
-    fn = 'corpus.{}.data'.format(hashlib.md5('data/penn'.encode()).hexdigest())
+    fn =  #'corpus.{}.data'.format(hashlib.md5('data/penn'.encode()).hexdigest())
     print('Loading cached dataset...')
     corpus = torch.load(fn)
     dictionary = corpus.dictionary
@@ -291,6 +293,8 @@ if __name__ == '__main__':
 
     print('Loading PTB dataset...')
     corpus = data_ptb.Corpus(args.data)
+    print("corpus is", corpus)
+    print('Loading PTB DONE')
     corpus.dictionary = dictionary
 
     test(model, corpus, args.cuda, prt=True)

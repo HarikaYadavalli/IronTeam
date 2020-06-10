@@ -6,7 +6,7 @@ import copy
 import numpy
 import torch
 import nltk
-from nltk.corpus import ptb
+from nltk.corpus import treebank
 
 word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT',
              'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
@@ -16,7 +16,7 @@ ellipsis = ['*', '*?*', '0', '*T*', '*ICH*', '*U*', '*RNR*', '*EXP*', '*PPA*', '
 punctuation_tags = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``']
 punctuation_words = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``', '--', ';', '-', '?', '!', '...', '-LCB-', '-RCB-']
 
-file_ids = ptb.fileids()
+file_ids = treebank.fileids()
 train_file_ids = []
 valid_file_ids = []
 test_file_ids = []
@@ -28,8 +28,9 @@ for id in file_ids:
         valid_file_ids.append(id)
     if 'WSJ/23/WSJ_2300.MRG' <= id <= 'WSJ/23/WSJ_2399.MRG':
         test_file_ids.append(id)
-    # elif 'WSJ/00/WSJ_0000.MRG' <= id <= 'WSJ/01/WSJ_0199.MRG' or 'WSJ/24/WSJ_2400.MRG' <= id <= 'WSJ/24/WSJ_2499.MRG':
-    #     rest_file_ids.append(id)
+    elif 'wsj_0001' <= id <= 'wsj_0099':
+        print("tokenising file names")
+        rest_file_ids.append(id)
 
 
 class Dictionary(object):
@@ -110,6 +111,7 @@ class Corpus(object):
                     self.dictionary.add_word(word)
 
     def tokenize(self, file_ids):
+        print("file ids: ", file_ids)
 
         def tree2list(tree):
             if isinstance(tree, nltk.Tree):
