@@ -29,4 +29,7 @@ and for parsing we need [Penn Treebank Parsed](https://catalog.ldc.upenn.edu/LDC
     and unlabeled F1 of approximately `47.7` on WSJ test set.
 
 ## Important notes while reproducing the experiments:
-1. This code can be used to do experiments for language modelling and Unsupervised Parsing. For the Unsupervised Parsing, we need to PTB data set and the data set quoted in the original paper is not free version. So we have used the PTB data from Kaggle datset:https://www.kaggle.com/nltkdata/penn-tree-bank/data
+1. This code can be used to do experiments for language modelling and Unsupervised Parsing. For the Unsupervised Parsing, we need to PTB data set which(only 5% it) can be downloaded from nltk. Also avaialble at: https://www.kaggle.com/nltkdata/penn-tree-bank/data
+2. We have found that it is efficient to train the model on ECS computer than allocated VM.
+3. Report has been uploaded as Reproducibility_Ordered_Neurons.pdf
+4. Test results and important figures used in the report uploaded under Reproducibility_Challenge_test_results
