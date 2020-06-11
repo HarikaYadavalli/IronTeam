@@ -140,7 +140,6 @@ def test(model, corpus, cuda, prt=False):
     corpus_sys = {}
     corpus_ref = {}
     for sen, sen_tree, sen_nltktree in dataset:
-        print("I am inside the dataset loop")
         if args.wsj10 and len(sen) > 12:
             continue
         x = numpy.array([word2idx[w] if w in word2idx else word2idx['<unk>'] for w in sen])
@@ -221,13 +220,13 @@ def test(model, corpus, cuda, prt=False):
 
     prec_list, reca_list, f1_list \
         = numpy.array(prec_list).reshape((-1,1)), numpy.array(reca_list).reshape((-1,1)), numpy.array(f1_list).reshape((-1,1))
-    if prt:
-        print('-' * 80)
-        numpy.set_printoptions(precision=4)
-        print('Mean Prec:', prec_list.mean(axis=0),
-              ', Mean Reca:', reca_list.mean(axis=0),
-              ', Mean F1:', f1_list.mean(axis=0))
-        print('Number of sentence: %i' % nsens)
+            if prt:
+            print('-' * 80)
+            numpy.set_printoptions(precision=4)
+            print('Mean Prec:', prec_list.mean(axis=0),
+                  ', Mean Reca:', reca_list.mean(axis=0),
+                  ', Mean F1:', f1_list.mean(axis=0))
+            print('Number of sentence: %i' % nsens)
 
         correct, total = corpus_stats_labeled(corpus_sys, corpus_ref)
         print(correct)
@@ -269,7 +268,7 @@ if __name__ == '__main__':
 
     # Load model
     with open(args.checkpoint, 'rb') as f:
-        model, _, _ = torch.load(f)
+        model, _, _ = torch.load(f, map_location=torch.device('cpu'))
         torch.cuda.manual_seed(args.seed)
         model.cpu()
         if args.cuda:

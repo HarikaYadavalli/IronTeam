@@ -23,15 +23,8 @@ valid_file_ids = []
 test_file_ids = []
 rest_file_ids = []
 for id in file_ids:
-    print("Print the id", id)
-    if 'WSJ/00/WSJ_0000.MRG' <= id <= 'WSJ/24/WSJ_2499.MRG':
-        train_file_ids.append(id)
-    if 'WSJ/22/WSJ_2200.MRG' <= id <= 'WSJ/22/WSJ_2299.MRG':
-        valid_file_ids.append(id)
-    if 'WSJ/23/WSJ_2300.MRG' <= id <= 'WSJ/23/WSJ_2399.MRG':
-        test_file_ids.append(id)
 
-    elif 'wsj_0001.mrg' <= id <= 'wsj_0099.mrg':
+    if 'wsj_0001' <= id <= 'wsj_0099':
         print("tokenising file names")
         rest_file_ids.append(id)
 
