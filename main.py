@@ -5,6 +5,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim.lr_scheduler as lr_scheduler
+import matplotlib.pyplot as plt
+import pickle
 
 import data
 import model
@@ -84,16 +86,46 @@ if torch.cuda.is_available():
         torch.cuda.manual_seed(args.seed)
 
 
+################################################################################
+# Added code to plot the train and validaiton curves
+###############################################################################
+def visual_plot(train_loss, val_loss, epoch):
+    #clean the previous graph
+    plt.clf()
+    plt.rcParams["figure.figsize"] = (16,8)
+
+    x = np.linspace(1,epoch,epoch)
+    l1, = plt.plot(x, train_loss, color='blue', label="train")
+    l2, = plt.plot(x, val_loss, color='orange', label="valid")
+    
+    plt.xticks([i+1 for i in range(epoch)])
+
+    plt.xlabel("Epoch",fontsize=14)
+    plt.ylabel("Loss",fontsize=14)
+
+
+    #plt.title("Train and validation loss in {} epochs".format(epoch),fontsize =16)
+
+    print("The graph is plotting")
+    plt.legend(handles = [l1, l2], numpoints = 1)
+    plt.savefig('./figure/train_val_loss-{}'.format(epoch))
+
+
 ###############################################################################
 # Load data
 ###############################################################################
-
-def model_save(fn):
+# added code to save trian and validation loss in each epoch
+def pkl_save(obj, filename):
+    with open(filename, 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+    return 1
+# added code to save the model in every five epoch with label
+def model_save(fn, ep):
     if args.philly:
         fn = os.path.join(os.environ['PT_OUTPUT_DIR'], fn)
     with open(fn, 'wb') as f:
-        torch.save([model, criterion, optimizer], f, filename='model-'+ epoch)
-
+        #torch.save([model, criterion, optimizer], f)
+        torch.save([model, criterion, optimizer], './model-{}'.format(ep))
 
 def model_load(fn):
     global model, criterion, optimizer
@@ -185,7 +217,9 @@ def evaluate(data_source, batch_size=10):
         hidden = repackage_hidden(hidden)
     return total_loss.item() / len(data_source)
 
+### Store train loss
 
+# added code in row 226, 272 and 288 to extract train loss
 def train():
     # Turn on training mode which enables dropout.
     if args.model == 'QRNN': model.reset()
@@ -195,6 +229,7 @@ def train():
     hidden = model.init_hidden(args.batch_size)
     batch, i = 0, 0
     while i < train_data.size(0) - 1 - 1:
+        train_loss = 0
         bptt = args.bptt if np.random.random() < 0.95 else args.bptt / 2.
         # Prevent excessively small or negative sequence lengths
         seq_len = max(5, int(np.random.normal(bptt, 5)))
@@ -237,6 +272,7 @@ def train():
         total_loss += raw_loss.data
         optimizer.param_groups[0]['lr'] = lr2
         if batch % args.log_interval == 0 and batch > 0:
+            train_loss += total_loss
             cur_loss = total_loss.item() / args.log_interval
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:05.5f} | ms/batch {:5.2f} | '
@@ -249,11 +285,14 @@ def train():
         batch += 1
         i += seq_len
 
+    return total_loss.item()/ len(train_data)
 
+# added code in row 295, 306, 312, 320 and 382-385 to extract train loss
 # Loop over epochs.
 lr = args.lr
 best_val_loss = []
 stored_loss = 100000000
+train_loss_list = []
 
 # At any point you can hit Ctrl + C to break out of training early.
 try:
@@ -264,9 +303,13 @@ try:
     if args.optimizer == 'adam':
         optimizer = torch.optim.Adam(params, lr=args.lr, betas=(0, 0.999), eps=1e-9, weight_decay=args.wdecay)
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', 0.5, patience=2, threshold=0)
+    val_loss_list = []
     for epoch in range(1, args.epochs + 1):
+        if epoch > 110:
+            break
         epoch_start_time = time.time()
-        train()
+        train_loss = train()
+        train_loss_list.append(train_loss)
         if 't0' in optimizer.param_groups[0]:
             tmp = {}
             for prm in model.parameters():
@@ -274,14 +317,15 @@ try:
                 prm.data = optimizer.state[prm]['ax'].clone()
 
             val_loss2 = evaluate(val_data, eval_batch_size)
+            val_loss_list.append(val_loss2)
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                   'valid ppl {:8.2f} | valid bpc {:8.3f}'.format(
                 epoch, (time.time() - epoch_start_time), val_loss2, math.exp(val_loss2), val_loss2 / math.log(2)))
             print('-' * 89)
 
-            if val_loss2 < stored_loss:
-                model_save(args.save)
+            if val_loss2 < stored_loss and epoch % 5 == 0:
+                model_save(args.save, epoch)
                 print('Saving Averaged!')
                 stored_loss = val_loss2
 
@@ -308,8 +352,8 @@ try:
                 epoch, (time.time() - epoch_start_time), val_loss, math.exp(val_loss), val_loss / math.log(2)))
             print('-' * 89)
 
-            if val_loss < stored_loss:
-                model_save(args.save)
+            if val_loss < stored_loss and epoch % 5 ==0:
+                model_save(args.save, epoch)
                 print('Saving model (new best validation)')
                 stored_loss = val_loss
 
@@ -328,8 +372,17 @@ try:
                 optimizer.param_groups[0]['lr'] /= 10.
 
             best_val_loss.append(val_loss)
+            val_loss_list.append(val_loss)
 
         print("PROGRESS: {}%".format((epoch / args.epochs) * 100))
+        
+        print('train_loss = ', train_loss_list)       
+        print('val_loss = ', val_loss_list)
+        
+        if epoch %5 == 0:
+            visual_plot(train_loss_list, val_loss_list, epoch)
+            pkl_save(train_loss_list, './model/train_loss-{}.pkl'.format(epoch))
+            pkl_save(val_loss_list, './model/val_loss-{}.pkl'.format(epoch))
 
 except KeyboardInterrupt:
     print('-' * 89)
@@ -340,7 +393,7 @@ model_load(args.save)
 
 # Run on test data.
 test_loss = evaluate(test_data, test_batch_size)
-print('=' * 89)
+print('='
 print('| End of training | test loss {:5.2f} | test ppl {:8.2f} | test bpc {:8.3f}'.format(
     test_loss, math.exp(test_loss), test_loss / math.log(2)))
 print('=' * 89)
