@@ -285,7 +285,7 @@ def train():
         batch += 1
         i += seq_len
 
-    return total_loss.item()/ len(train_data)
+    return train_loss.item()/ len(train_data)
 
 # added code in row 295, 306, 312, 320 and 382-385 to extract train loss
 # Loop over epochs.
@@ -393,7 +393,7 @@ model_load(args.save)
 
 # Run on test data.
 test_loss = evaluate(test_data, test_batch_size)
-print('='
+print('=' * 89)
 print('| End of training | test loss {:5.2f} | test ppl {:8.2f} | test bpc {:8.3f}'.format(
     test_loss, math.exp(test_loss), test_loss / math.log(2)))
 print('=' * 89)
