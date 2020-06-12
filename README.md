@@ -33,3 +33,5 @@ and for parsing we need [Penn Treebank Parsed](https://catalog.ldc.upenn.edu/LDC
 2. We have found that it is efficient to train the model on ECS computer than allocated VM.
 3. Report has been uploaded as Reproducibility_Ordered_Neurons.pdf
 4. Test results and important figures used in the report uploaded under Reproducibility_Challenge_test_results
+
+NOTE: Understanding the ON-LSTM architecture is not straight forward and it took a good amount of time to understand the architecture and the intuition behind the changes. And the training is time consuming since the On-LSTM ordering slowed down the performance Sequential LSTM model further, and didn't give us much space to try something new.
